@@ -1,5 +1,5 @@
 <?php
-class html_object {
+class cd_object {
 	
 	public function open_html() {
 		echo "<html>";
@@ -32,78 +32,54 @@ class html_object {
 			
 	}
 	
-/*	public function import_data() {
-		print "<head>
-			<Title>Import data</Title>
-		</head>
-		<h3>Import data</h3>
-		<body>
-		<form action='getfile.php' method='post'><br>
-		Type (or select) Filename: <input type='file' name='uploadFile'>
-		<input type='submit' value='Upload File'>
-		</form>
-		<body>";
-		
-	}*/
 	
-	public function import_data() {
+	/* takes a .txt file with a specific format (as described in the readme)
+	   makes a multidemnsional array with the contents to make a music library */
+	public function import_data($file) {
 		
-		$file = "C:\Users\joef\Desktop\Music.txt";
+		//select file - will be changed to be less specific
 		
-		//header("Content-Type: text/plain");
 		$music_array = array();
 		
-		//get the file contents
-		//$contents = file_get_contents($file);
+		//$contents is an array containing the contents of the file line by line.
 		$contents = file($file);
+		//the string that will be searched for by the function (why the formating is essential).
 		$search1 = "Group: ";
 		
 		
-		
-		foreach($contents as $lines) {
+		//iterate 
+		foreach($contents as $key=>$lines) {
 			
-			//var_dump($lines);
 			
 			if (strpos($lines, $search1) !== false) {	
 				
-				//$key is the key for the lines in the $content array
-				$key = array_search($lines, $contents);
+				//trim is used to clean up $music array (no unnecessary returns or spaces)
+				$lines = trim($lines);
 				
 				$group = str_replace($search1, "", $lines);
 
-				if (!in_array($group, $music_array)) {
+				//searches $music_array for the group name to see if it is already there.
+				if (!array_key_exists($group, $music_array)) {
+					
 					$music_array[$group] = array();
-				
-				
-					$album = str_replace("Album: ", "", $contents[$key + 1]);
-				
-					$music_array[$group][$album] = array();
-				} 
-				else {
-				$album2 = str_replace("Album: ", "", $contents[$key + 1]);
-				
-				$music_array[$group][$album2] = array();
+					
 				}
-				$num_songs = str_replace("Songs: ", "", $contents[$key + 2]);
-				echo $num_songs;
-				$i = 1;
-				/*do {
 					
-					
-					$i ++;
-				} while ($i <= $num_songs);*/
-				//do this so it gets to do the later albums by the same artist. 
-				unset($contents[$key]);
-			}
-			
-			
+				$album = str_replace("Album: ", "", trim($contents[$key + 1]));
+				
+
+				$music_array[$group][$album] = array();
+
+				$num_songs = str_replace("Songs: ", "", trim($contents[$key + 2]));
+				
+				//add songs to the albums
+				for ($i = 0; $i < $num_songs; $i++) {
+					$music_array[$group][$album][] = trim($contents[$key + 3 + $i]);
+				}			
+			}	
 		}
 		
-		print_r($music_array);
-		//$count = count($count_array);
-		//echo $count;
-		
-		
+		return $music_array;
 	}
 	
 
